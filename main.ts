@@ -24,6 +24,7 @@ async function handleFetch(request: Request): Promise<Response> {
 
   const { searchParams } = new URL(request.url);
   let source: string | URL = searchParams.get("url") || "";
+  const password = searchParams.get("password");
 
   let reply: BodyInit = "";
 
@@ -62,7 +63,7 @@ async function handleFetch(request: Request): Promise<Response> {
         },
         body: JSON.stringify({
           url: `${source}`,
-          password: searchParams.get("password"),
+          password,
         }),
         signal,
       },
@@ -83,10 +84,13 @@ async function handleFetch(request: Request): Promise<Response> {
 
       let response;
       if (host === "fshare.vn" || host === "www.fshare.vn") {
+        const url = new URL(source);
+        url.searchParams.set("password", password);
+        
         response = await Rclone.backend(
           "download",
           ":fshare:",
-          `${source}`,
+          `${url}`,
           {},
         );
       } else {
