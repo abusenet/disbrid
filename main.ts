@@ -1,7 +1,11 @@
 #!/usr/bin/env -S deno run --allow-all
 
 import { router } from "https://raw.githubusercontent.com/sntran/hack-n-slash/main/mod.ts";
-import { fetch, Progress, Rclone } from "https://raw.githubusercontent.com/sntran/denolcr/rclone/main.ts";
+import {
+  fetch,
+  Progress,
+  Rclone,
+} from "https://raw.githubusercontent.com/sntran/denolcr/rclone/main.ts";
 
 const encoder = new TextEncoder();
 // Rclone remote to upload files to, default to current directory.
@@ -45,7 +49,7 @@ async function handleFetch(request: Request): Promise<Response> {
 
   const { searchParams } = new URL(request.url);
   let source: string | URL = searchParams.get("url") || "";
-  const password = searchParams.get("password");
+  const password = searchParams.get("password") || "";
 
   let reply: BodyInit = "";
 
@@ -106,7 +110,7 @@ async function handleFetch(request: Request): Promise<Response> {
       if (host === "fshare.vn" || host === "www.fshare.vn") {
         const url = new URL(source);
         url.searchParams.set("password", password);
-        
+
         response = await Rclone.backend(
           "download",
           ":fshare:",
@@ -201,10 +205,14 @@ export const routes = {
 export const handler = (options = {}) => router(routes, options);
 
 if (import.meta.main) {
-  const { serve } = await import("https://deno.land/std@0.178.0/http/server.ts");
+  const { serve } = await import(
+    "https://deno.land/std@0.178.0/http/server.ts"
+  );
 
   const controller = new AbortController();
-  const route = handler();
+  const route = handler({
+    serveOnly: false,
+  });
 
   serve((request, connInfo) => {
     const { method, url } = request;
@@ -214,7 +222,7 @@ if (import.meta.main) {
       return route(request, connInfo);
     }
 
-    const { pathname, searchParams } = new URL(url);
+    const { pathname } = new URL(url);
 
     if (pathname === "/") {
       return new Response("Hello");
