@@ -1,0 +1,29 @@
+#Use an Ubuntu 18.04 base for our staging server
+FROM vm/ubuntu:18.04
+MEMORY 10G
+
+# To note: Layerfiles create entire VMs, *not* containers!
+
+# Install unzip
+RUN apt-get update && apt install unzip
+
+# Install Deno
+RUN curl -fsSL https://deno.land/x/install/install.sh | sh
+ENV DENO_INSTALL="/root/.deno" \
+    PATH="$DENO_INSTALL/bin:$PATH"
+
+# You could also install & start a database:
+# RUN apt-get update && apt-get install postgresql
+
+# This line copies the repository to /root in the runner
+COPY . .
+
+# Copy .env file
+SECRET ENV MUNASHII_ENV_FILE
+RUN echo "$MUNASHII_ENV_FILE" | base64 -d > ~/.env
+
+# Expose the webserver in the staging server as a secure link.
+# Whenever someone clicks the link, we'll load this staging server and forward
+# their requests to it.
+RUN BACKGROUND . .env && deno run --unstable --allow-all main.ts 9000
+EXPOSE WEBSITE http://localhost:9000
