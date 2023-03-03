@@ -13,7 +13,7 @@ const HOSTERS = [
   "ddl.to",
   "katfile.org",
   "mega.nz",
-  "rapidgators.net",
+  "rapidgator.net",
   "uptobox.com",
   "zippyshare.com",
 ];
