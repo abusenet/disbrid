@@ -18,22 +18,24 @@ const HOSTERS = [
   "zippyshare.com",
 ];
 
-function help(request: Request): Response {
+function help(_request: Request): Response {
   return new Response(
-    `\rFetches a resource from its "url" and optional "password".\r\n
-    \r\n
+    `\rDiscord-based Debrid Application.\r\n\r\n
+
     \rUSAGE:\r\n
-    \r  /[COMMAND] [OPTIONS]\r\n
-    \r\n
+    \r    /[COMMAND] [OPTIONS]\r\n\r\n
+
     \rCOMMANDS:\r\n
-    \r  fetch:\r\n
-    \r      Fetches a resource from its "url" and optional "password"\r\n
-    \r  help:\r\n
-    \r      Displays this message.\r\n
-    \r\n
+    \r    fetch:\r\n
+    \r        Fetches a resource from its "url" and optional "password"\r\n
+    \r    help:\r\n
+    \r        Displays this message.\r\n\r\n
+
     \rOPTIONS:\r\n
-    \r  url: Link of the remote URL\r\n
-    \r  password: Password of the file if any.\r\n`
+    \r    url:\r\n
+    \r        Link of the remote URL\r\n
+    \r    password:\r\n
+    \r        Password of the file if any.\r\n`,
   );
 }
 
