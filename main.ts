@@ -7,20 +7,11 @@ import {
   Rclone,
 } from "https://raw.githubusercontent.com/sntran/denolcr/rclone/main.ts";
 
+import { fetch as debrid } from "./plugins/debrid-link.fr/main.ts";
+
 const encoder = new TextEncoder();
 // Rclone remote to upload files to, default to current directory.
 const TARGET = Deno.env.get("RCLONE_TARGET") || Deno.cwd();
-
-const HOSTERS = [
-  "1fichier.com",
-  "anonfiles.com",
-  "ddl.to",
-  "katfile.org",
-  "mega.nz",
-  "rapidgator.net",
-  "uptobox.com",
-  "zippyshare.com",
-];
 
 function help(_request: Request): Response {
   return new Response(
@@ -43,7 +34,7 @@ function help(_request: Request): Response {
   );
 }
 
-async function handleFetch(request: Request): Promise<Response> {
+function handleFetch(request: Request): Response | Promise<Response> {
   const authorization = request.headers.get("Authorization")!;
   const [_user] = atob(authorization.split(" ")[1]).split(":");
 
@@ -59,8 +50,6 @@ async function handleFetch(request: Request): Promise<Response> {
     return new Response(`Invalid URL`);
   }
 
-  const host = source.host;
-
   //#region AbortSignal
   const handlerAbortController = new AbortController();
   const signal = handlerAbortController.signal;
@@ -75,49 +64,26 @@ async function handleFetch(request: Request): Promise<Response> {
   });
   //#endregion AbortSignal
 
-  //#region HOSTERS
-  // Grabs direct link from free hosters.
-  if (HOSTERS.includes(host)) {
-    const response = await fetch(
-      "https://debrid-link.com/api/v2/downloader/add",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${Deno.env.get("DEBRID_API_KEY")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: `${source}`,
-          password,
-        }),
-      },
-    );
-    const { success, error, value } = await response.json();
-    if (!success) {
-      return new Response(`Can't fetch with error: ${error}`);
-    }
-
-    source = new URL(value.downloadUrl);
-  }
-  //#endregion HOSTERS
-
   // @TODO: Use Rclone's `--progress` instead when it's available.
   reply = new ReadableStream({
     async start(controller) { // When the stream starts
       console.time(`${source}`);
 
-      let response;
-      if (host === "fshare.vn" || host === "www.fshare.vn") {
-        const url = new URL(source);
-        url.searchParams.set("password", password);
+      source = new URL(source);
+      source.searchParams.set("password", password);
 
+      // Tries plugins until we get a successful response.
+      let response = await debrid(source);
+      if (!response.ok) {
         response = await Rclone.backend(
           "download",
           ":fshare:",
-          `${url}`,
+          `${source}`,
           {},
         );
-      } else {
+      }
+      if (!response.ok) {
+        source.searchParams.delete("password");
         response = await Rclone.cat(`${source}`);
       }
 
