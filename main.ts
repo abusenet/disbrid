@@ -179,8 +179,26 @@ if (import.meta.main) {
   const { serve } = await import("https://deno.land/std@0.178.0/http/server.ts");
 
   const controller = new AbortController();
+  const route = handler();
 
-  serve(handler(), {
+  serve((request, connInfo) => {
+    const { method, url } = request;
+
+    // POST requests are from Discord's interaction.
+    if (method === "POST") {
+      return route(request, connInfo);
+    }
+
+    const { pathname, searchParams } = new URL(url);
+
+    if (pathname === "/") {
+      return new Response("Hello");
+    }
+
+    return new Response(null, {
+      status: 404,
+    });
+  }, {
     port: Number(Deno.env.get("PORT")) || 9000,
     signal: controller.signal,
   });
