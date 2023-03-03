@@ -18,6 +18,25 @@ const HOSTERS = [
   "zippyshare.com",
 ];
 
+function help(request: Request): Response {
+  return new Response(
+    `\rFetches a resource from its "url" and optional "password".\r\n
+    \r\n
+    \rUSAGE:\r\n
+    \r  /[COMMAND] [OPTIONS]\r\n
+    \r\n
+    \rCOMMANDS:\r\n
+    \r  fetch:\r\n
+    \r      Fetches a resource from its "url" and optional "password"\r\n
+    \r  help:\r\n
+    \r      Displays this message.\r\n
+    \r\n
+    \rOPTIONS:\r\n
+    \r  url: Link of the remote URL\r\n
+    \r  password: Password of the file if any.\r\n`
+  );
+}
+
 async function handleFetch(request: Request): Promise<Response> {
   const authorization = request.headers.get("Authorization")!;
   const [_user] = atob(authorization.split(" ")[1]).split(":");
@@ -175,6 +194,7 @@ handleFetch.displayName =
 
 export const routes = {
   "/fetch?url=&password=": handleFetch,
+  "/help": help,
 };
 
 export const handler = (options = {}) => router(routes, options);
