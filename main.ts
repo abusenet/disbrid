@@ -88,9 +88,9 @@ async function handleFetch(request: Request): Promise<Response> {
         }),
       },
     );
-    const { success, value } = await response.json();
+    const { success, error, value } = await response.json();
     if (!success) {
-      return new Response("Can't fetch");
+      return new Response(`Can't fetch with error: ${error}`);
     }
 
     source = new URL(value.downloadUrl);
