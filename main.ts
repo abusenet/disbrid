@@ -84,7 +84,6 @@ async function handleFetch(request: Request): Promise<Response> {
           url: `${source}`,
           password,
         }),
-        signal,
       },
     );
     const { success, value } = await response.json();
