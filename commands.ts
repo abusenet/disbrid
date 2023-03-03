@@ -1,71 +1,72 @@
-#!/usr/bin/env -S deno run --allow-all
-
-/**
- * A CLI helper to manage Discord commands.
- * 
- * USAGE:
- *     # Retrieves all global command registered by the application
- *     ./commands GET
- * 
- *     # Retrieves all guild commands registered by the application.
- *     ./commands GET <guildId>
- * 
- *     # Deletes all global command registered by the application
- *     ./commands DELETE
- * 
- *     # Deletes all guild commands registered by the application.
- *     ./commands DELETE <guildId>
- */
-
-const options: Record<string, string> = {};
 const DISCORD_BASE_URL = "https://discord.com/api/v10";
 
-const [method = "GET", guildId] = Deno.args;
+export function request(request: Request) {
+  const { method, body } = request;
+  const { pathname, searchParams } = new URL(request.url);
 
-const {
-  applicationId = Deno.env.get("DISCORD_APPLICATION_ID") || "",
-  authToken = Deno.env.get("DISCORD_BOT_TOKEN") || "",
-  tokenPrefix,
-} = options;
+  const applicationId = searchParams.get("applicationId") || Deno.env.get("DISCORD_APPLICATION_ID") || "";
+  const authToken = searchParams.get("token") || Deno.env.get("DISCORD_BOT_TOKEN") || "";
+  const tokenPrefix = searchParams.get("prefix");
+  const guildId = searchParams.get("guildId");
 
-const endpoint = guildId
-  ? `applications/${applicationId}/guilds/${guildId}/commands`
-  : `applications/${applicationId}/commands`;
-const headers = {
-  "Authorization": `${(tokenPrefix || "Bot")} ${authToken}`,
-  "Content-Type": "application/json",
-};
+  const endpoint = guildId
+    ? `applications/${applicationId}/guilds/${guildId}/commands`
+    : `applications/${applicationId}/commands`;
+  const headers = {
+    "Authorization": `${(tokenPrefix || "Bot")} ${authToken}`,
+    "Content-Type": "application/json",
+  };
 
-const response = await fetch(`${DISCORD_BASE_URL}/${endpoint}`, {
-  method: method === "DELETE" ? "GET" : method,
-  headers,
-})
+  const url = new URL(`${DISCORD_BASE_URL}/${endpoint}${pathname === "/" ? "" : pathname}`);
 
-if (!response.ok) {
-  console.error(`Failed to execute: ${response.statusText}`);
-  Deno.exit();
+  return fetch(url, {
+    method,
+    headers,
+    body,
+  });
 }
 
-if (response.body) {
-  const commands = await response.json();
+if (import.meta.main) {
+  const [method = "GET", guildId = ""] = Deno.args;
+  const searchParams = new URLSearchParams({ guildId });
+  const response = await request(new Request(`discord:/?${searchParams}`, {
+    method: method === "DELETE" ? "GET" : method,
+  }));
 
-  if (method !== "DELETE") {
-    console.log(commands);
+  if (!response.ok) {
+    console.error(`Failed to execute: ${response.statusText}`);
     Deno.exit();
   }
 
-  for await (const command of commands) {
-    const response = await fetch(
-      `${DISCORD_BASE_URL}/applications/${applicationId}/commands/${command.id}`,
-      {
-        method,
-        headers,
-      },
-    );
+  if (response.body) {
+    const commands = await response.json();
 
-    if (!response.ok) {
-      console.error(`Failed to execute: ${response.statusText}`);
+    if (method === "GET") {
+      console.log(commands);
       Deno.exit();
+    }
+
+    if (method === "DELETE") {
+      for await (const command of commands) {
+        const response = await request(new Request(`discord:/${command.id}?${searchParams}`, { method }));
+
+        if (!response.ok) {
+          console.error(`Failed to execute: ${response.statusText}`);
+          Deno.exit();
+        }
+      }
+    }
+
+    if (method === "PUT") {
+      const response = await request(new Request(`discord:/?${searchParams}`, {
+        method,
+        body: Deno.stdin.readable,
+      }));
+
+      if (!response.ok) {
+        console.error(`Failed to execute: ${response.statusText}`);
+        Deno.exit();
+      }
     }
   }
 }
