@@ -1,3 +1,5 @@
+#!/usr/bin/env -S deno run --allow-env --allow-net=discord.com
+
 const DISCORD_BASE_URL = "https://discord.com/api/v10";
 
 export function request(request: Request) {
