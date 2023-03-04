@@ -1,11 +1,11 @@
 #!/usr/bin/env -S deno run --allow-all
 
-import { router } from "https://raw.githubusercontent.com/sntran/hack-n-slash/main/mod.ts";
-import {
+import { 
+  router,
   fetch,
   Progress,
   Rclone,
-} from "https://raw.githubusercontent.com/sntran/denolcr/rclone/main.ts";
+} from "./deps.ts";
 
 import { fetch as debrid } from "./plugins/debrid-link.fr/main.ts";
 
