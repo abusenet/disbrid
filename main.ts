@@ -153,11 +153,7 @@ function handleFetch(
 
   // @TODO: sends a "direct" link in the response for media to stream there.
 
-  return new Response(reply, {
-    headers: {
-      "Link": `</retry>; title="Retry"`,
-    },
-  });
+  return new Response(reply);
 }
 handleFetch.displayName =
   "Fetches a file from a remote `url`, with optional `password`.";
