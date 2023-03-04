@@ -1,11 +1,6 @@
 #!/usr/bin/env -S deno run --allow-all
 
-import { 
-  router,
-  fetch,
-  Progress,
-  Rclone,
-} from "./deps.ts";
+import { fetch, Progress, Rclone, router } from "./deps.ts";
 
 import { fetch as debrid } from "./plugins/debrid-link.fr/main.ts";
 
@@ -34,12 +29,16 @@ function help(_request: Request): Response {
   );
 }
 
-function handleFetch(request: Request): Response | Promise<Response> {
+function handleFetch(
+  request: Request,
+  _info: unknown,
+  params: Record<string, string>,
+): Response | Promise<Response> {
   const authorization = request.headers.get("Authorization")!;
   const [_user] = atob(authorization.split(" ")[1]).split(":");
 
+  let source: string | URL = params.url;
   const { searchParams } = new URL(request.url);
-  let source: string | URL = searchParams.get("url") || "";
   const password = searchParams.get("password") || "";
 
   let reply: BodyInit = "";
@@ -67,7 +66,7 @@ function handleFetch(request: Request): Response | Promise<Response> {
   // @TODO: Use Rclone's `--progress` instead when it's available.
   reply = new ReadableStream({
     async start(controller) { // When the stream starts
-      console.time(`${source}`);
+      console.time(params.url);
 
       source = new URL(source);
       source.searchParams.set("password", password);
@@ -126,7 +125,7 @@ function handleFetch(request: Request): Response | Promise<Response> {
         }
 
         if (done) {
-          console.timeEnd(`${source}`);
+          console.timeEnd(params.url);
         }
         controller.enqueue(encoder.encode(message));
       }
@@ -164,7 +163,7 @@ handleFetch.displayName =
   "Fetches a file from a remote `url`, with optional `password`.";
 
 export const routes = {
-  "/fetch?url=&password=": handleFetch,
+  "/fetch/:url?password=": handleFetch,
   "/help": help,
 };
 
