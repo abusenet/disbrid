@@ -39,7 +39,7 @@ export async function fetch(
 
   if (!HOSTERS.includes(host)) {
     return new Response(null, {
-      status: 404,
+      status: 400,
     });
   }
 

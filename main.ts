@@ -73,7 +73,7 @@ function handleFetch(
 
       // Tries plugins until we get a successful response.
       let response = await debrid(source);
-      if (!response.ok) {
+      if (response.status === 400) { // Bad Request - not supported URL
         response = await Rclone.backend(
           "download",
           ":fshare:",
@@ -81,18 +81,12 @@ function handleFetch(
           {},
         );
       }
-      if (!response.ok) {
+      if (response.status === 400) { // Bad Request - not supported URL
         source.searchParams.delete("password");
         response = await Rclone.cat(`${source}`);
       }
 
       const { ok, status, statusText, headers, body, url } = response;
-
-      let { pathname } = new URL(url);
-      pathname = decodeURIComponent(pathname);
-      const filename = pathname.substring(pathname.lastIndexOf("/") + 1);
-
-      const fileSize = Number(headers.get("Content-Length"));
 
       if (!ok) {
         controller.enqueue(
@@ -100,6 +94,12 @@ function handleFetch(
         );
         return;
       }
+
+      let { pathname } = new URL(url);
+      pathname = decodeURIComponent(pathname);
+      const filename = pathname.substring(pathname.lastIndexOf("/") + 1);
+
+      const fileSize = Number(headers.get("Content-Length"));
 
       //#region Progress
       function onProgress({
