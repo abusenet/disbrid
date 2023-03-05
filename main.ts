@@ -117,6 +117,13 @@ function handleFetch(
         );
         return;
       }
+      
+      if (headers.get("Content-Type")?.includes("text/html")) {
+         controller.enqueue(
+          encoder.encode(`\r**Error**: Host did not return supported file`),
+        );
+        return;
+      }
 
       let { pathname } = new URL(url);
       pathname = decodeURIComponent(pathname);
