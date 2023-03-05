@@ -8,9 +8,30 @@ const encoder = new TextEncoder();
 // Rclone remote to upload files to, default to current directory.
 const TARGET = Deno.env.get("RCLONE_TARGET") || Deno.cwd();
 
-function help(_request: Request): Response {
-  return new Response(
-    `\rDiscord-based Debrid Application.\r\n\r\n
+function help(request: Request): Response {
+  const languages = request.headers.get("Accept-Language")?.split(",") || [];
+  
+  let message = "";
+
+  if (languages.some((language) => language.includes("vi"))) {
+    message = `\rỨng dụng Debrid trên nền tảng Discord.\r\n\r\n
+
+    \rCÁCH SỬ DỤNG:\r\n
+    \r    /[LỆNH] [TÙY CHỌN]\r\n\r\n
+
+    \rLỆNH:\r\n
+    \r    fetch:\r\n
+    \r        Tải tài nguyên từ "url" và "password" tùy chọn\r\n
+    \r    help:\r\n
+    \r        Hiển thị thông báo này.\r\n\r\n
+
+    \rTÙY CHỌN:\r\n
+    \r    url:\r\n
+    \r        Liên kết của URL từ xa\r\n
+    \r    password:\r\n
+    \r        Mật khẩu của tệp nếu có.\r\n`;
+  } else {
+    message = `\rDiscord-based Debrid Application.\r\n\r\n
 
     \rUSAGE:\r\n
     \r    /[COMMAND] [OPTIONS]\r\n\r\n
@@ -25,8 +46,10 @@ function help(_request: Request): Response {
     \r    url:\r\n
     \r        Link of the remote URL\r\n
     \r    password:\r\n
-    \r        Password of the file if any.\r\n`,
-  );
+    \r        Password of the file if any.\r\n`;
+  }
+
+  return new Response(message);
 }
 
 function handleFetch(
