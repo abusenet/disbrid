@@ -122,7 +122,7 @@ function handleFetch(
          controller.enqueue(
           encoder.encode(`\r**Error**: Host did not return supported file`),
         );
-        console.error(`Host: ${url}: ${status} ${statusText} - ${headers}`);
+        console.error(`Host: ${url}: ${status} ${statusText} - ${Object.fromEntries(headers.entries())}`);
         return;
       }
 
