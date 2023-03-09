@@ -96,10 +96,6 @@ function handleFetch(
 
       // Tries plugins until we get a successful response.
       let response = await debrid(source);
-      console.log({
-        service: "debrid",
-        response,
-      })
       if (response.status === 400) { // Bad Request - not supported URL
         response = await Rclone.backend(
           "download",
