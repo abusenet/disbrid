@@ -75,6 +75,9 @@ export async function fetch(
     // name
   } = value;
 
-  console.log("fetching", downloadUrl);
- return fetch(downloadUrl);
+  return fetch(downloadUrl, {
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+    },
+  });
 }
