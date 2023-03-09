@@ -56,6 +56,9 @@ export async function fetch(
   });
 
   const { success, error, value } = await response.json();
+  console.log({
+    success, error, value,
+  })
   if (!success) {
     return new Response(`Can't fetch with error: ${error}`, {
       status: response.status,
