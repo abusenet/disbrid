@@ -8,6 +8,8 @@ const encoder = new TextEncoder();
 // Rclone remote to upload files to, default to current directory.
 const TARGET = Deno.env.get("RCLONE_TARGET") || Deno.cwd();
 
+const SMALL_TIME_UNITS = /\s[\d]+(ms|µs|ns)/g;
+
 function help(request: Request): Response {
   const languages = request.headers.get("Accept-Language")?.split(",") || [];
   
@@ -141,6 +143,9 @@ function handleFetch(
         rateh,
         timeh,
       }: Progress) {
+        etah = etah.replace(SMALL_TIME_UNITS, ""); // We don't need high precision.
+        timeh = timeh.replace(SMALL_TIME_UNITS, "");
+
         let message = "\f"; // Clears previous message.
         message +=
           `\r\nTransferred:    ${completedh} / ${totalh}, ${percent}%, ${rateh}/s`;
