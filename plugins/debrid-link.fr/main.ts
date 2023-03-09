@@ -75,8 +75,8 @@ export async function fetch(
     // name
   } = value;
 
-  const response = await fetch(downloadUrl);
+  const response1 = await fetch(downloadUrl);
 
-  console.log(response);
-  return response;
+  console.log(response1);
+  return response1;
 }
