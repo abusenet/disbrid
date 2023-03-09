@@ -75,9 +75,5 @@ export async function fetch(
     // name
   } = value;
 
-  return fetch(downloadUrl, {
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-    },
-  });
+  return globalFetch(downloadUrl);
 }
