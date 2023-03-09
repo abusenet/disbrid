@@ -75,5 +75,8 @@ export async function fetch(
     // name
   } = value;
 
-  return fetch(downloadUrl);
+  const response = await fetch(downloadUrl);
+
+  console.log(response);
+  return response;
 }
