@@ -2,7 +2,8 @@
 
 import { fetch, Progress, Rclone, router } from "./deps.ts";
 
-import debrid from "./plugins/debrid-link.fr/main.ts";
+import DebridLink from "./plugins/debrid-link.fr/main.ts";
+import RealDebrid from "./plugins/real-debrid.com/main.ts";
 
 const encoder = new TextEncoder();
 // Rclone remote to upload files to, default to current directory.
@@ -97,7 +98,7 @@ function handleFetch(
       source.searchParams.set("password", password);
 
       // Tries plugins until we get a successful response.
-      let response = await debrid.fetch(new Request(source));
+      let response = await RealDebrid.fetch(new Request(source));
       if (response.status === 400) { // Bad Request - not supported URL
         response = await Rclone.backend(
           "download",
