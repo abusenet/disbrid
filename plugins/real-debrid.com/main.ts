@@ -14,8 +14,6 @@ const HOSTERS = await fetch(`${BASE_URL}/hosts`)
   .then(response => response.json())
   .then((hosts: Record<domain, Host>) => Object.keys(hosts));
 
-console.log(HOSTERS);
-
 const exports = {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
