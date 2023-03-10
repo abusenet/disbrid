@@ -92,7 +92,6 @@ function handleFetch(
   // @TODO: Use Rclone's `--progress` instead when it's available.
   reply = new ReadableStream({
     async start(controller) { // When the stream starts
-      console.time(params.url);
 
       source = new URL(source);
       source.searchParams.set("password", password);
@@ -160,9 +159,6 @@ function handleFetch(
           message += `, ${etah}`;
         }
 
-        if (done) {
-          console.timeEnd(params.url);
-        }
         controller.enqueue(encoder.encode(message));
       }
       //#endregion Progress
