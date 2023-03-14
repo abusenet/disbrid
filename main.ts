@@ -97,7 +97,7 @@ function handleFetch(
       source.searchParams.set("password", password);
 
       // Tries plugins until we get a successful response.
-      let response = await RealDebrid.fetch(new Request(source));
+      let response = await DebridLink.fetch(new Request(source));
       if (response.status === 400) { // Bad Request - not supported URL
         response = await Rclone.backend(
           "download",
