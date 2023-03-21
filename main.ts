@@ -96,7 +96,7 @@ export const commands = {
   },
 };
 
-"/fetch/:url?password=".displayName =
+commands["/fetch/:url?password="].displayName =
   "Fetches a file from a remote `url`, with optional `password`.";
 
 export const handler = (options = {}) => router(commands, options);
